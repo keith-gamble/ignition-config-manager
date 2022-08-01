@@ -19,7 +19,6 @@ import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceBuilder;
 import com.inductiveautomation.ignition.common.project.resource.ResourcePath;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.ResourceEditor;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.TabbedResourceWorkspace;
 
@@ -31,7 +30,6 @@ import net.miginfocom.swing.MigLayout;
  */
 public class ConfigEditor extends ResourceEditor<ConfigResource> {
     private RSyntaxTextArea textArea;
-    private static final LoggerEx logger = LoggerEx.newBuilder().build("ConfigEditor");
 
     public ConfigEditor(TabbedResourceWorkspace workspace, ResourcePath path) {
         super(workspace, path);
@@ -46,21 +44,24 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
 
         @Override
         public void changedUpdate(DocumentEvent e) {
-            logger.info("changedUpdate");
             this.editor.commit();
         }
 
         @Override
         public void insertUpdate(DocumentEvent e) {
-            logger.trace("insertUpdate");
+            // TODO Auto-generated method stub
+            
         }
 
         @Override
         public void removeUpdate(DocumentEvent e) {
-            logger.trace("removeUpdate");
+            // TODO Auto-generated method stub
+            
         }
 
+
     }
+
 
 
     @Override
@@ -105,7 +106,6 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
 
     @Override
     public void commit() {
-        logger.info("Commiting change");
         super.commit();
     }
 
