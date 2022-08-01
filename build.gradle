@@ -83,3 +83,12 @@ ignitionModule {
     // documentationIndex.set("index.html")
 
 }
+
+
+task deepClean() {
+    dependsOn allprojects.collect { "${it.path}:clean" }
+    description "Executes clean tasks and remove node plugin caches."
+    doLast {
+        delete(file(".gradle"))
+    }
+}

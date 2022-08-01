@@ -18,7 +18,6 @@ import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
 import com.inductiveautomation.ignition.client.icons.VectorIcons;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceBuilder;
 import com.inductiveautomation.ignition.common.project.resource.ResourcePath;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.NewResourceAction;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.ResourceDescriptor;
@@ -37,12 +36,10 @@ import com.inductiveautomation.ignition.designer.workspacewelcome.WorkspaceWelco
 public class ConfigManagerWorkspace extends TabbedResourceWorkspace {
     // Constructor that takes a DesignerContext.
 
-    private static final LoggerEx logger = LoggerEx.newBuilder().build("test.gateway.TestGatewayHook");
-
     public ConfigManagerWorkspace(DesignerContext context) {
         super(context, ResourceDescriptor.builder()
                 .resourceType(ConfigResource.RESOURCE_TYPE)
-                .nounKey("Config File")
+                .nounKey("ConfigManager.config.noun")
                 .rootFolderText("Process Configs")
                 .rootIcon(VectorIcons.get("script-configure"))
                 .navTreeLocation(999)
@@ -64,7 +61,6 @@ public class ConfigManagerWorkspace extends TabbedResourceWorkspace {
         menu.add(new NewResourceAction(this, folderNode, newConfigJson) {
 
             {
-                logger.info("addingNewResourceActions");
                 putValue(Action.NAME, "New Config");
                 putValue(Action.SMALL_ICON, VectorIcons.get("script-configure"));
 

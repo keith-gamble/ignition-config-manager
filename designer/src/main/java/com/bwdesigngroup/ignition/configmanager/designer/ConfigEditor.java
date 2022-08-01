@@ -8,6 +8,9 @@ package com.bwdesigngroup.ignition.configmanager.designer;
 
 import java.nio.charset.Charset;
 
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -16,6 +19,7 @@ import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceBuilder;
 import com.inductiveautomation.ignition.common.project.resource.ResourcePath;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.ResourceEditor;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.TabbedResourceWorkspace;
 
@@ -27,9 +31,48 @@ import net.miginfocom.swing.MigLayout;
  */
 public class ConfigEditor extends ResourceEditor<ConfigResource> {
     private RSyntaxTextArea textArea;
+    private static final LoggerEx logger = LoggerEx.newBuilder().build("ConfigEditor");
 
     public ConfigEditor(TabbedResourceWorkspace workspace, ResourcePath path) {
         super(workspace, path);
+    }
+
+    class ConfigDocumentListener implements DocumentListener {
+        private ConfigEditor editor;
+
+        public ConfigDocumentListener(ConfigEditor editor) {
+            this.editor = editor;
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            logger.info("changedUpdate");
+            this.editor.commit();
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            logger.trace("insertUpdate");
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            logger.trace("removeUpdate");
+        }
+
+    }
+
+
+    @Override
+    protected void init(ConfigResource configResource) {
+        removeAll();
+        
+        this.setLayout(new MigLayout("fill, insets 0"));
+
+        this.textArea = new RSyntaxTextArea(configResource.json);
+        this.textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
+        this.textArea.getDocument().addDocumentListener(new ConfigDocumentListener(this));
+        this.add(new RTextScrollPane(textArea), "grow");
     }
 
     @Override
@@ -37,16 +80,6 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
         return new ConfigResource(this.textArea.getText());
     }
 
-    @Override
-    protected void init(ConfigResource configResource) {
-        removeAll();
-
-        this.setLayout(new MigLayout("fill, insets 0"));
-
-        this.textArea = new RSyntaxTextArea(configResource.json);
-        this.textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
-        this.add(new RTextScrollPane(textArea), "grow");
-    }
 
 
     @Override
@@ -56,13 +89,24 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
         if (data != null) {
             return new ConfigResource(new String(data, Charset.forName("UTF-8")));
         } else {
-            return new ConfigResource("");
+            return new ConfigResource("{}");
         }
+    }
+
+    @Override
+    protected byte[] serialize(ConfigResource configResource) throws Exception {
+        return super.serialize(configResource);
     }
 
     @Override
     protected void serializeResource(ProjectResourceBuilder builder, ConfigResource resource) {
         builder.putData(ConfigResource.DATA_KEY, resource.json.getBytes());
     }
-    
+
+    @Override
+    public void commit() {
+        logger.info("Commiting change");
+        super.commit();
+    }
+
 }

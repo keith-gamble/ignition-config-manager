@@ -4,6 +4,7 @@ import javax.swing.Icon;
 
 import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
 import com.inductiveautomation.ignition.client.icons.VectorIcons;
+import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
 import com.inductiveautomation.ignition.designer.model.AbstractDesignerModuleHook;
@@ -19,10 +20,12 @@ public class ProcessConfigManagerDesignerHook extends AbstractDesignerModuleHook
     @SuppressWarnings("unused")
     private DesignerContext context;
 
+
     @Override
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
         this.context = context;
 
+        BundleUtil.get().addBundle("ConfigManager", ProcessConfigManagerDesignerHook.class.getClassLoader(), "ConfigManager");
         context.registerResourceWorkspace( new ConfigManagerWorkspace(context));
     }
 
