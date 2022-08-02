@@ -2,11 +2,14 @@ package com.bwdesigngroup.ignition.configmanager.designer;
 
 import javax.swing.Icon;
 
+import com.bwdesigngroup.ignition.configmanager.client.scripting.ClientScriptModule;
 import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
 import com.inductiveautomation.ignition.client.icons.VectorIcons;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
+import com.inductiveautomation.ignition.common.script.ScriptManager;
+import com.inductiveautomation.ignition.common.script.hints.PropertiesFileDocProvider;
 import com.inductiveautomation.ignition.designer.model.AbstractDesignerModuleHook;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
@@ -15,9 +18,8 @@ import com.inductiveautomation.ignition.designer.model.DesignerContext;
  * This is the Designer-scope module hook.  The minimal implementation contains a startup method.
  */
 
-public class ProcessConfigManagerDesignerHook extends AbstractDesignerModuleHook {
+public class DesignerHook extends AbstractDesignerModuleHook {
 
-    @SuppressWarnings("unused")
     private DesignerContext context;
 
 
@@ -25,8 +27,8 @@ public class ProcessConfigManagerDesignerHook extends AbstractDesignerModuleHook
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
         this.context = context;
 
-        BundleUtil.get().addBundle("ConfigManager", ProcessConfigManagerDesignerHook.class.getClassLoader(), "ConfigManager");
-        context.registerResourceWorkspace( new ConfigManagerWorkspace(context));
+        BundleUtil.get().addBundle("ConfigManager", DesignerHook.class.getClassLoader(), "ConfigManager");
+        this.context.registerResourceWorkspace( new ConfigManagerWorkspace(this.context));
     }
 
     @Override
@@ -54,5 +56,16 @@ public class ProcessConfigManagerDesignerHook extends AbstractDesignerModuleHook
         } else {
             return super.getResourceIcon(id);
         }
+    }
+
+    @Override
+    public void initializeScriptManager(ScriptManager manager) {
+        super.initializeScriptManager(manager);
+
+        manager.addScriptModule(
+            "system.config",
+            new ClientScriptModule(),
+            new PropertiesFileDocProvider()
+        );
     }
 }
