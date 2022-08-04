@@ -4,17 +4,23 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package com.bwdesigngroup.ignition.configmanager.common.scripting;
+package com.bwdesigngroup.ignition.configmanager.common;
 
-import org.json.JSONException;
-import org.python.core.PyObject;
-
-import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
+import java.util.Map;
 
 /**
  *
  * @author Keith Gamble
  */
-public interface ConfigScripts {
-    public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException;
+public class Utilities {
+    public static <K, V> K getKey(Map<K, V> map, V value)
+    {
+        for (Map.Entry<K, V> entry: map.entrySet())
+        {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 }

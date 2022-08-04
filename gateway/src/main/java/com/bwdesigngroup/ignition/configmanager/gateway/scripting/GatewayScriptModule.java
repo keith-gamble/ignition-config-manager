@@ -6,6 +6,8 @@
 */
 package com.bwdesigngroup.ignition.configmanager.gateway.scripting;
 
+import org.json.JSONException;
+import org.python.core.PyObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +16,9 @@ import com.bwdesigngroup.ignition.configmanager.common.scripting.ConfigScriptMod
 import com.bwdesigngroup.ignition.configmanager.gateway.GatewayHook;
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
 import com.inductiveautomation.ignition.common.project.RuntimeProject;
+import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
 import com.inductiveautomation.ignition.common.project.resource.ResourcePath;
-import com.inductiveautomation.ignition.common.script.ScriptContext;
+import com.inductiveautomation.ignition.common.script.builtin.SystemUtilities;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 /**
@@ -25,27 +28,40 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 public class GatewayScriptModule extends ConfigScriptModule{
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final String projectName;
 
-    @Override
-    protected String getConfigImpl(String configPath) throws ProjectInvalidException {
-        return this.getProjectResource(configPath);
+    public GatewayScriptModule(String projectName) {
+        logger.trace("Initializing GatewayScriptModule for {}", projectName);
+        this.projectName = projectName;
     }
 
-    public String getProjectResource(String path) throws ProjectInvalidException {
+
+    @Override
+    protected PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
+        
+
+        return this.getProjectResourceObject(this.getProjectResource(configPath));
+    }
+
+    public ProjectResource getProjectResource(String path) throws ProjectInvalidException {
         GatewayContext gateway = GatewayHook.getGatewayContext();
 
-        // String projectName = gateway.getSystemProperties().getGatewayScriptingProject();
-        String projectName = ScriptContext.defaultProject();
-        logger.info("Requesting resource {} from project {}", path, projectName);
-
         RuntimeProject project = gateway.getProjectManager()
-        .getProject(projectName)
-        .orElseThrow() // throws NoSuchElementException if project not found
-        .validateOrThrow(); // throws ProjectInvalidException if the project is invalid
-        
+            .getProject( this.projectName )
+            .orElseThrow() // throws NoSuchElementException if project not found
+            .validateOrThrow();
+
         ResourcePath resourcePath = new ResourcePath(ConfigResource.RESOURCE_TYPE, path);
 
-        return project.getResource(resourcePath).toString();
+        ProjectResource resource = (ProjectResource) project.getResource(resourcePath).orElseThrow();    
+
+        return resource;
+    }
+
+    public PyObject getProjectResourceObject(ProjectResource resource) throws JSONException {
+        String resourceJson = ConfigResource.deserializeConfig(resource);
+
+        return SystemUtilities.jsonDecode(resourceJson);
     }
 
     

@@ -1,20 +1,34 @@
 package com.bwdesigngroup.ignition.configmanager.gateway;
 
+import java.util.WeakHashMap;
+
+import org.python.core.PyObject;
+import org.python.core.PyString;
+import org.python.core.PyStringMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.bwdesigngroup.ignition.configmanager.common.Utilities;
 import com.bwdesigngroup.ignition.configmanager.gateway.scripting.GatewayScriptModule;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
+import com.inductiveautomation.ignition.common.script.JythonExecException;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
 import com.inductiveautomation.ignition.common.script.hints.PropertiesFileDocProvider;
 import com.inductiveautomation.ignition.gateway.clientcomm.ClientReqSession;
 import com.inductiveautomation.ignition.gateway.model.AbstractGatewayModuleHook;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
+
 /**
  * Class which is instantiated by the Ignition platform when the module is loaded in the gateway scope.
  */
 public class GatewayHook extends AbstractGatewayModuleHook {
 
+    public static WeakHashMap<GatewayScriptModule,String> scriptModules = new WeakHashMap<GatewayScriptModule,String>();
+
+    
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private static GatewayContext gatewayContext;
-    private final GatewayScriptModule scriptModule = new GatewayScriptModule();
     
     /**
      * Called to before startup. This is the chance for the module to add its extension points and update persistent
@@ -39,26 +53,41 @@ public class GatewayHook extends AbstractGatewayModuleHook {
     public void initializeScriptManager(ScriptManager manager) {
         super.initializeScriptManager(manager);
 
-        manager.addScriptModule(
+        PyStringMap localsMap = manager.createLocalsMap();
+        PyObject getProjectName = localsMap.get((new PyString("system"))).__getattr__("util").__getattr__("getProjectName");
+        
+        String projectName = null;
+        try {
+            projectName = manager.runFunction(getProjectName).toString();
+        } catch (JythonExecException e) {
+            logger.error("Error getting project name", e);
+        }
+
+        if (projectName != null) {            
+            GatewayScriptModule scriptModule = new GatewayScriptModule(projectName);
+            scriptModules.put(scriptModule, projectName.toString());
+
+            manager.addScriptModule(
                 "system.config",
                 scriptModule,
                 new PropertiesFileDocProvider());
+        }
     }
 
     @Override
     public Object getRPCHandler(ClientReqSession session, String projectName) {
-        return scriptModule;
+        return Utilities.getKey(scriptModules, projectName);
     }
 
     @Override
     public void shutdown() {
-        // TODO Auto-generated method stub
+        logger.info("Shutting down configmanager module");
         
     }
 
     @Override
     public void startup(LicenseState arg0) {
-        // TODO Auto-generated method stub
+        logger.info("Starting up configmanager module");
         
     }
 

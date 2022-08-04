@@ -6,6 +6,12 @@
 */
 package com.bwdesigngroup.ignition.configmanager.client.scripting;
 
+import org.json.JSONException;
+import org.python.core.PyObject;
+
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
+
 import com.bwdesigngroup.ignition.configmanager.common.Constants;
 import com.bwdesigngroup.ignition.configmanager.common.scripting.ConfigScriptModule;
 import com.bwdesigngroup.ignition.configmanager.common.scripting.ConfigScripts;
@@ -17,7 +23,7 @@ import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
  */
 public class ClientScriptModule extends ConfigScriptModule{
     private final ConfigScripts rpc;
-    
+    // private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public ClientScriptModule() {
         rpc = ModuleRPCFactory.create(
@@ -27,7 +33,7 @@ public class ClientScriptModule extends ConfigScriptModule{
     }
 
     @Override
-    protected String getConfigImpl(String configPath) throws ProjectInvalidException {
-        return rpc.getConfig(configPath);
+    protected PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
+        return rpc.getConfig(new PyObject[]{}, new String[]{"configPath", configPath});
     }
 }

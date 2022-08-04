@@ -7,9 +7,13 @@
 package com.bwdesigngroup.ignition.configmanager.common.scripting;
 
 
+import org.json.JSONException;
+import org.python.core.PyObject;
+
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
-import com.inductiveautomation.ignition.common.script.hints.ScriptArg;
+import com.inductiveautomation.ignition.common.script.builtin.KeywordArgs;
+import com.inductiveautomation.ignition.common.script.builtin.PyArgumentMap;
 import com.inductiveautomation.ignition.common.script.hints.ScriptFunction;
 /**
  *
@@ -28,11 +32,20 @@ public abstract class ConfigScriptModule implements ConfigScripts{
 
     @Override
     @ScriptFunction(docBundlePrefix = "ConfigScripts")
-    public String getConfig(@ScriptArg("configPath") String configPath) throws ProjectInvalidException {
+    @KeywordArgs(names={"configPath"}, types={String.class})
+    public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException {
+        if (pyArgs.length == 0) {
+            throw new IllegalArgumentException("getConfig requires resourcePath parameter");
+        }
+
+        PyArgumentMap args = PyArgumentMap.interpretPyArgs(pyArgs, keywords, ConfigScriptModule.class, "getConfig"); 
+
+        String configPath = args.getStringArg("configPath");
+
         return getConfigImpl(configPath);
     }
 
-    protected abstract String getConfigImpl(String configPath) throws ProjectInvalidException;
+    protected abstract PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException;
 
 
 
