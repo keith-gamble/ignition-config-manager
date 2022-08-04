@@ -35,5 +35,6 @@ public class ClientScriptModule extends ConfigScriptModule{
     @Override
     protected PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
         return rpc.getConfig(new PyObject[]{}, new String[]{"configPath", configPath});
+        // return rpc.getConfig(configPath);
     }
 }

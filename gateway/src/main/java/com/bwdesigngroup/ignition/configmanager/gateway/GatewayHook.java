@@ -1,6 +1,7 @@
 package com.bwdesigngroup.ignition.configmanager.gateway;
 
-import java.util.WeakHashMap;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 import org.python.core.PyObject;
 import org.python.core.PyString;
@@ -8,7 +9,6 @@ import org.python.core.PyStringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwdesigngroup.ignition.configmanager.common.Utilities;
 import com.bwdesigngroup.ignition.configmanager.gateway.scripting.GatewayScriptModule;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.script.JythonExecException;
@@ -24,7 +24,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class GatewayHook extends AbstractGatewayModuleHook {
 
-    public static WeakHashMap<GatewayScriptModule,String> scriptModules = new WeakHashMap<GatewayScriptModule,String>();
+    public static HashMap<String,WeakReference<GatewayScriptModule>> scriptModules = new HashMap<String,WeakReference<GatewayScriptModule>>();
 
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -64,19 +64,26 @@ public class GatewayHook extends AbstractGatewayModuleHook {
         }
 
         if (projectName != null) {            
-            GatewayScriptModule scriptModule = new GatewayScriptModule(projectName);
-            scriptModules.put(scriptModule, projectName.toString());
+            WeakReference<GatewayScriptModule> scriptModule = new WeakReference<GatewayScriptModule>(new GatewayScriptModule(projectName));
+            scriptModules.put(projectName.toString(), scriptModule);
 
             manager.addScriptModule(
                 "system.config",
-                scriptModule,
+                scriptModule.get(),
                 new PropertiesFileDocProvider());
         }
     }
 
     @Override
     public Object getRPCHandler(ClientReqSession session, String projectName) {
-        return Utilities.getKey(scriptModules, projectName);
+
+        // If there is not a script module for the project, create one and add it to the scriptModules map
+        if (scriptModules.get(projectName) == null) {
+            WeakReference<GatewayScriptModule> scriptModule = new WeakReference<GatewayScriptModule>(new GatewayScriptModule(projectName));
+            scriptModules.put(projectName.toString(), scriptModule);
+        }
+
+        return scriptModules.get(projectName).get();
     }
 
     @Override

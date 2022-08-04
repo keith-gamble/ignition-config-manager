@@ -6,20 +6,24 @@
 */
 package com.bwdesigngroup.ignition.configmanager.common.scripting;
 
-
 import org.json.JSONException;
 import org.python.core.PyObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
+import com.inductiveautomation.ignition.common.script.PyArgParser;
 import com.inductiveautomation.ignition.common.script.builtin.KeywordArgs;
-import com.inductiveautomation.ignition.common.script.builtin.PyArgumentMap;
 import com.inductiveautomation.ignition.common.script.hints.ScriptFunction;
 /**
  *
  * @author Keith Gamble
  */
 public abstract class ConfigScriptModule implements ConfigScripts{
+
+    @SuppressWarnings("unused")
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     static {
         BundleUtil.get().addBundle(
@@ -30,17 +34,33 @@ public abstract class ConfigScriptModule implements ConfigScripts{
     }
 
 
+
+    // @Override
+    // @ScriptFunction(docBundlePrefix = "ConfigScripts")
+    // public PyObject getConfig(String configPath) throws ProjectInvalidException, JSONException {
+        
+    //     // If configPath is still null, then lets throw an exception
+    //     if (configPath == null) {
+    //         throw new IllegalArgumentException("configPath is a required keyword or positional argument");
+    //     }
+
+    //     return getConfigImpl(configPath);
+    // }
+
+
     @Override
     @ScriptFunction(docBundlePrefix = "ConfigScripts")
     @KeywordArgs(names={"configPath"}, types={String.class})
     public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException {
-        if (pyArgs.length == 0) {
-            throw new IllegalArgumentException("getConfig requires resourcePath parameter");
+        logger.info("provided args: {}, keywords: {}", pyArgs, keywords);
+
+        PyArgParser args = PyArgParser.parseArgs(pyArgs, keywords, new String[] {"configPath"}, new Class[] {String.class}, "getConfig");
+
+		String configPath = args.getString("configPath").orElse(null);
+
+        if (configPath == null) {
+            throw new IllegalArgumentException("configPath is a required keyword or positional argument");
         }
-
-        PyArgumentMap args = PyArgumentMap.interpretPyArgs(pyArgs, keywords, ConfigScriptModule.class, "getConfig"); 
-
-        String configPath = args.getStringArg("configPath");
 
         return getConfigImpl(configPath);
     }

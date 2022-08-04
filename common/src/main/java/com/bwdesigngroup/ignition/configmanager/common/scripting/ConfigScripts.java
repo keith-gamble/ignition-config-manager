@@ -17,4 +17,5 @@ import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
  */
 public interface ConfigScripts {
     public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException;
+    // public PyObject getConfig(String configPath) throws ProjectInvalidException, JSONException;
 }
