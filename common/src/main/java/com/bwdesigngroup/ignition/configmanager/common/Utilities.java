@@ -6,34 +6,21 @@
 */
 package com.bwdesigngroup.ignition.configmanager.common;
 
-import java.nio.charset.Charset;
+import java.util.Map;
 
-import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
-import com.inductiveautomation.ignition.common.project.resource.ResourceType;
 /**
  *
  * @author Keith Gamble
  */
-public class ConfigResource {
-    public static final ResourceType RESOURCE_TYPE = new ResourceType(Constants.MODULE_ID, Constants.TYPE_ID);
-    public static final String DATA_KEY = Constants.FILE_NAME;
-    public String json = "{}";
-
-    public ConfigResource(String JSON) {
-        this.json = JSON;
-    }
-
-    public ConfigResource(ProjectResource resource) {
-        this.json = deserializeConfig(resource);
-    }
-
-    public static String deserializeConfig(ProjectResource resource) {
-        byte[] data = resource.getData(ConfigResource.DATA_KEY);
-
-        if (data != null) {
-            return new String(data, Charset.forName("UTF-8"));
-        } else {
-            return "{}";
+public class Utilities {
+    public static <K, V> K getKey(Map<K, V> map, V value)
+    {
+        for (Map.Entry<K, V> entry: map.entrySet())
+        {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
         }
+        return null;
     }
 }

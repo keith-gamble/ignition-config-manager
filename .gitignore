@@ -39,8 +39,10 @@ local.properties
 .gradle/
 build/
 gradle.properties
+
 # VS Code files
 .vscode/
+*.code-workspace
 
 # Testing related files
 docker/

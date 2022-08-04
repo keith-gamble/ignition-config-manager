@@ -6,8 +6,6 @@
 */
 package com.bwdesigngroup.ignition.configmanager.designer;
 
-import java.nio.charset.Charset;
-
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -85,13 +83,7 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
 
     @Override
     protected ConfigResource deserialize(ProjectResource resource) {
-        byte[] data = resource.getData(ConfigResource.DATA_KEY);
-
-        if (data != null) {
-            return new ConfigResource(new String(data, Charset.forName("UTF-8")));
-        } else {
-            return new ConfigResource("{}");
-        }
+        return new ConfigResource(resource);
     }
 
     @Override
