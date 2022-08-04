@@ -7,6 +7,7 @@
 package com.bwdesigngroup.ignition.configmanager.common.scripting;
 
 import org.json.JSONException;
+import org.python.core.PyDictionary;
 import org.python.core.PyObject;
 
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
@@ -16,6 +17,7 @@ import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
  * @author Keith Gamble
  */
 public interface ConfigScripts {
-    public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException;
-    // public PyObject getConfig(String configPath) throws ProjectInvalidException, JSONException;
+    public PyDictionary getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException;
+    public PyDictionary getConfigOverRPC(String configPath) throws ProjectInvalidException, JSONException;
+
 }

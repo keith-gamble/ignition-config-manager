@@ -7,6 +7,7 @@
 package com.bwdesigngroup.ignition.configmanager.common.scripting;
 
 import org.json.JSONException;
+import org.python.core.PyDictionary;
 import org.python.core.PyObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
 import com.inductiveautomation.ignition.common.script.PyArgParser;
 import com.inductiveautomation.ignition.common.script.builtin.KeywordArgs;
+import com.inductiveautomation.ignition.common.script.hints.NoHint;
 import com.inductiveautomation.ignition.common.script.hints.ScriptFunction;
 /**
  *
@@ -47,25 +49,24 @@ public abstract class ConfigScriptModule implements ConfigScripts{
     //     return getConfigImpl(configPath);
     // }
 
+    @NoHint
+    public PyDictionary getConfigOverRPC(String configPath) throws ProjectInvalidException, JSONException {
+        return getConfigImpl(configPath);
+    }
+
 
     @Override
     @ScriptFunction(docBundlePrefix = "ConfigScripts")
     @KeywordArgs(names={"configPath"}, types={String.class})
-    public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException {
-        logger.info("provided args: {}, keywords: {}", pyArgs, keywords);
-
+    public PyDictionary getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException {
         PyArgParser args = PyArgParser.parseArgs(pyArgs, keywords, new String[] {"configPath"}, new Class[] {String.class}, "getConfig");
 
-		String configPath = args.getString("configPath").orElse(null);
-
-        if (configPath == null) {
-            throw new IllegalArgumentException("configPath is a required keyword or positional argument");
-        }
+		String configPath = args.requireString("configPath");
 
         return getConfigImpl(configPath);
     }
 
-    protected abstract PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException;
+    protected abstract PyDictionary getConfigImpl(String configPath) throws ProjectInvalidException, JSONException;
 
 
 

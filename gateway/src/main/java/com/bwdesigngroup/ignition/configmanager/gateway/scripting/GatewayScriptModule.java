@@ -7,7 +7,7 @@
 package com.bwdesigngroup.ignition.configmanager.gateway.scripting;
 
 import org.json.JSONException;
-import org.python.core.PyObject;
+import org.python.core.PyDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class GatewayScriptModule extends ConfigScriptModule{
 
 
     @Override
-    protected PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
+    protected PyDictionary getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
         
 
         return this.getProjectResourceObject(this.getProjectResource(configPath));
@@ -58,10 +58,10 @@ public class GatewayScriptModule extends ConfigScriptModule{
         return resource;
     }
 
-    public PyObject getProjectResourceObject(ProjectResource resource) throws JSONException {
+    public PyDictionary getProjectResourceObject(ProjectResource resource) throws JSONException {
         String resourceJson = ConfigResource.deserializeConfig(resource);
 
-        return SystemUtilities.jsonDecode(resourceJson);
+        return (PyDictionary) SystemUtilities.jsonDecode(resourceJson);
     }
 
     
