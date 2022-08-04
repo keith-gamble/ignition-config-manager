@@ -35,20 +35,6 @@ public abstract class ConfigScriptModule implements ConfigScripts{
         );
     }
 
-
-
-    // @Override
-    // @ScriptFunction(docBundlePrefix = "ConfigScripts")
-    // public PyObject getConfig(String configPath) throws ProjectInvalidException, JSONException {
-        
-    //     // If configPath is still null, then lets throw an exception
-    //     if (configPath == null) {
-    //         throw new IllegalArgumentException("configPath is a required keyword or positional argument");
-    //     }
-
-    //     return getConfigImpl(configPath);
-    // }
-
     @NoHint
     public PyDictionary getConfigOverRPC(String configPath) throws ProjectInvalidException, JSONException {
         return getConfigImpl(configPath);
