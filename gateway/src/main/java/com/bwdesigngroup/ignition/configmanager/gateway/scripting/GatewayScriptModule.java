@@ -7,11 +7,13 @@
 package com.bwdesigngroup.ignition.configmanager.gateway.scripting;
 
 import org.json.JSONException;
-import org.python.core.PyObject;
+import org.python.core.PyDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
+import com.bwdesigngroup.ignition.configmanager.common.resources.AbstractConfigResource;
+import com.bwdesigngroup.ignition.configmanager.common.resources.GatewayConfigResource;
+import com.bwdesigngroup.ignition.configmanager.common.resources.ProjectConfigResource;
 import com.bwdesigngroup.ignition.configmanager.common.scripting.ConfigScriptModule;
 import com.bwdesigngroup.ignition.configmanager.gateway.GatewayHook;
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
@@ -25,7 +27,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  *
  * @author Keith Gamble
  */
-public class GatewayScriptModule extends ConfigScriptModule{
+public class GatewayScriptModule extends ConfigScriptModule {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final String projectName;
@@ -35,33 +37,62 @@ public class GatewayScriptModule extends ConfigScriptModule{
         this.projectName = projectName;
     }
 
-
+    
     @Override
-    protected PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
-        
+    public PyDictionary getConfigImpl(String configPath, String scope) throws ProjectInvalidException, JSONException {
+        ProjectResource resource;
 
-        return this.getProjectResourceObject(this.getProjectResource(configPath));
+        if (scope.equals("project")) {
+            resource = GatewayScriptModule.getProjectResource(configPath, this.projectName);
+        } else if (scope.equals("gateway")) {
+            resource = GatewayScriptModule.getGatewayResource(configPath, this.projectName);
+        } else {
+            // TODO: This does not correctly get thrown all the way back to the client
+            throw new ProjectInvalidException("Invalid scope: " + scope);
+        }
+
+        // TODO: Add something that throws an exception if no resource is found
+        
+        return this.decodeResourceObject(resource);
     }
 
-    public ProjectResource getProjectResource(String path) throws ProjectInvalidException {
+    // TODO: Convert this to work as gateway resources in some way
+    public static ProjectResource getGatewayResource(String path, String projectName) throws ProjectInvalidException {
         GatewayContext gateway = GatewayHook.getGatewayContext();
 
         RuntimeProject project = gateway.getProjectManager()
-            .getProject( this.projectName )
+            .getProject( projectName )
             .orElseThrow() // throws NoSuchElementException if project not found
             .validateOrThrow();
 
-        ResourcePath resourcePath = new ResourcePath(ConfigResource.RESOURCE_TYPE, path);
+        ResourcePath resourcePath = new ResourcePath(GatewayConfigResource.RESOURCE_TYPE, path);
 
-        ProjectResource resource = (ProjectResource) project.getResource(resourcePath).orElseThrow();    
+        // TODO: Throw an exception a little more clear about the resource being wrong here
+        ProjectResource resource = (ProjectResource) project.getResource(resourcePath).orElseThrow(() -> new ProjectInvalidException("Resource not found: " + resourcePath));    
 
         return resource;
     }
 
-    public PyObject getProjectResourceObject(ProjectResource resource) throws JSONException {
-        String resourceJson = ConfigResource.deserializeConfig(resource);
+    public static ProjectResource getProjectResource(String path, String projectName) throws ProjectInvalidException {
+        GatewayContext gateway = GatewayHook.getGatewayContext();
 
-        return SystemUtilities.jsonDecode(resourceJson);
+        RuntimeProject project = gateway.getProjectManager()
+            .getProject( projectName )
+            .orElseThrow() // throws NoSuchElementException if project not found
+            .validateOrThrow();
+
+        ResourcePath resourcePath = new ResourcePath(ProjectConfigResource.RESOURCE_TYPE, path);
+
+        // TODO: Throw an exception a little more clear about the resource being wrong here
+        ProjectResource resource = (ProjectResource) project.getResource(resourcePath).orElseThrow(() -> new ProjectInvalidException("Resource not found: " + resourcePath));   
+
+        return resource;
+    }
+
+    public PyDictionary decodeResourceObject(ProjectResource resource) throws JSONException {
+        String resourceJson = AbstractConfigResource.deserializeConfig(resource);
+
+        return (PyDictionary) SystemUtilities.jsonDecode(resourceJson);
     }
 
     

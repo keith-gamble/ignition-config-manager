@@ -14,7 +14,7 @@ package com.bwdesigngroup.ignition.configmanager.common;
 public class Constants {
 
     public static final String MODULE_ID = "com.bwdesigngroup.ignition.configmanager";
-    public static final String TYPE_ID = "config";
     
     public static final String FILE_NAME = "config.json";
+
 }

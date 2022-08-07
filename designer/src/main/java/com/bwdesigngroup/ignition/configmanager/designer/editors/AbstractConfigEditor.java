@@ -4,7 +4,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package com.bwdesigngroup.ignition.configmanager.designer;
+package com.bwdesigngroup.ignition.configmanager.designer.editors;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -13,12 +13,12 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
+import com.bwdesigngroup.ignition.configmanager.common.resources.AbstractConfigResource;
+import com.bwdesigngroup.ignition.configmanager.designer.workspaces.AbstractConfigWorkspace;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceBuilder;
 import com.inductiveautomation.ignition.common.project.resource.ResourcePath;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.ResourceEditor;
-import com.inductiveautomation.ignition.designer.tabbedworkspace.TabbedResourceWorkspace;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -26,17 +26,18 @@ import net.miginfocom.swing.MigLayout;
  *
  * @author Keith Gamble
  */
-public class ConfigEditor extends ResourceEditor<ConfigResource> {
-    private RSyntaxTextArea textArea;
+public abstract class AbstractConfigEditor extends ResourceEditor<AbstractConfigResource> {
+    protected RSyntaxTextArea textArea;
+    protected AbstractConfigWorkspace workspace;
 
-    public ConfigEditor(TabbedResourceWorkspace workspace, ResourcePath path) {
+    public AbstractConfigEditor(AbstractConfigWorkspace workspace, ResourcePath path) {
         super(workspace, path);
     }
 
     class ConfigDocumentListener implements DocumentListener {
-        private ConfigEditor editor;
+        private AbstractConfigEditor editor;
 
-        public ConfigDocumentListener(ConfigEditor editor) {
+        public ConfigDocumentListener(AbstractConfigEditor editor) {
             this.editor = editor;
         }
 
@@ -60,10 +61,8 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
 
     }
 
-
-
     @Override
-    protected void init(ConfigResource configResource) {
+    protected void init(AbstractConfigResource configResource) {
         removeAll();
         
         this.setLayout(new MigLayout("fill, insets 0"));
@@ -75,25 +74,19 @@ public class ConfigEditor extends ResourceEditor<ConfigResource> {
     }
 
     @Override
-    protected ConfigResource getObjectForSave() throws Exception {
-        return new ConfigResource(this.textArea.getText());
-    }
-
-
+    protected abstract AbstractConfigResource getObjectForSave() throws Exception;
 
     @Override
-    protected ConfigResource deserialize(ProjectResource resource) {
-        return new ConfigResource(resource);
-    }
+    protected abstract AbstractConfigResource deserialize(ProjectResource resource);
 
     @Override
-    protected byte[] serialize(ConfigResource configResource) throws Exception {
+    protected byte[] serialize(AbstractConfigResource configResource) throws Exception {
         return super.serialize(configResource);
     }
 
     @Override
-    protected void serializeResource(ProjectResourceBuilder builder, ConfigResource resource) {
-        builder.putData(ConfigResource.DATA_KEY, resource.json.getBytes());
+    protected void serializeResource(ProjectResourceBuilder builder, AbstractConfigResource resource) {
+        builder.putData(AbstractConfigResource.DATA_KEY, resource.json.getBytes());
     }
 
     @Override

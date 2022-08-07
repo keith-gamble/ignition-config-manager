@@ -3,7 +3,10 @@ package com.bwdesigngroup.ignition.configmanager.designer;
 import javax.swing.Icon;
 
 import com.bwdesigngroup.ignition.configmanager.client.scripting.ClientScriptModule;
-import com.bwdesigngroup.ignition.configmanager.common.ConfigResource;
+import com.bwdesigngroup.ignition.configmanager.common.resources.GatewayConfigResource;
+import com.bwdesigngroup.ignition.configmanager.common.resources.ProjectConfigResource;
+import com.bwdesigngroup.ignition.configmanager.designer.workspaces.GatewayConfigWorkspace;
+import com.bwdesigngroup.ignition.configmanager.designer.workspaces.ProjectConfigWorkspace;
 import com.inductiveautomation.ignition.client.icons.VectorIcons;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
@@ -22,19 +25,30 @@ public class DesignerHook extends AbstractDesignerModuleHook {
 
     private DesignerContext context;
 
-
     @Override
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
         this.context = context;
 
         BundleUtil.get().addBundle("ConfigManager", DesignerHook.class.getClassLoader(), "ConfigManager");
-        this.context.registerResourceWorkspace( new ConfigManagerWorkspace(this.context));
+
+        // Intialize the root navigation node in the project browser
+        ConfigManagerNavTreeNode configManagerNavTreeNode = new ConfigManagerNavTreeNode();
+        this.context.getProjectBrowserRoot().addChild(configManagerNavTreeNode);
+
+        // Initialize the project subnode and add it to the root node
+        ProjectConfigWorkspace projectWorkspace =  new ProjectConfigWorkspace(this.context, configManagerNavTreeNode);
+        GatewayConfigWorkspace gatewayWorkspace = new GatewayConfigWorkspace(this.context, configManagerNavTreeNode);
+        this.context.registerResourceWorkspace(projectWorkspace);
+        this.context.registerResourceWorkspace(gatewayWorkspace);
+
     }
 
     @Override
     public String getResourceCategoryKey(ProjectResourceId id) {
-        if (id.getResourceType().equals(ConfigResource.RESOURCE_TYPE)) {
-            return "Process Config";
+        if (id.getResourceType().equals(GatewayConfigResource.RESOURCE_TYPE)) {
+            return "Gateway Config";
+        } else if (id.getResourceType().equals(ProjectConfigResource.RESOURCE_TYPE)) {
+            return "Project Config";
         } else {
             return super.getResourceCategoryKey(id);
         }
@@ -42,7 +56,7 @@ public class DesignerHook extends AbstractDesignerModuleHook {
 
     @Override
     public String getResourceDisplayName(ProjectResourceId id) {
-        if (id.getResourceType().equals(ConfigResource.RESOURCE_TYPE)) {
+        if (id.getResourceType().equals(GatewayConfigResource.RESOURCE_TYPE) || id.getResourceType().equals(ProjectConfigResource.RESOURCE_TYPE)) {
             return "Config";
         } else {
             return super.getResourceDisplayName(id);
@@ -51,7 +65,7 @@ public class DesignerHook extends AbstractDesignerModuleHook {
 
     @Override
     public Icon getResourceIcon(ProjectResourceId id) {
-        if (id.getResourceType().equals(ConfigResource.RESOURCE_TYPE)) {
+        if (id.getResourceType().equals(GatewayConfigResource.RESOURCE_TYPE) || id.getResourceType().equals(ProjectConfigResource.RESOURCE_TYPE)) {
             return VectorIcons.get("script-configure");
         } else {
             return super.getResourceIcon(id);

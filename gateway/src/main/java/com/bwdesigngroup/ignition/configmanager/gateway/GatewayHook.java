@@ -1,6 +1,7 @@
 package com.bwdesigngroup.ignition.configmanager.gateway;
 
-import java.util.WeakHashMap;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 import org.python.core.PyObject;
 import org.python.core.PyString;
@@ -8,8 +9,7 @@ import org.python.core.PyStringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwdesigngroup.ignition.configmanager.common.Utilities;
-import com.bwdesigngroup.ignition.configmanager.gateway.scripting.GatewayScriptModule;
+import com.bwdesigngroup.ignition.configmanager.gateway.scripting.ModuleRPCHandler;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.script.JythonExecException;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
@@ -24,7 +24,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class GatewayHook extends AbstractGatewayModuleHook {
 
-    public static WeakHashMap<GatewayScriptModule,String> scriptModules = new WeakHashMap<GatewayScriptModule,String>();
+    public static HashMap<String, WeakReference<ModuleRPCHandler>> scriptModules = new HashMap<String, WeakReference<ModuleRPCHandler>>();
 
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -64,8 +64,8 @@ public class GatewayHook extends AbstractGatewayModuleHook {
         }
 
         if (projectName != null) {            
-            GatewayScriptModule scriptModule = new GatewayScriptModule(projectName);
-            scriptModules.put(scriptModule, projectName.toString());
+            WeakReference<ModuleRPCHandler> scriptModule = new WeakReference<ModuleRPCHandler>(new ModuleRPCHandler(projectName));
+            scriptModules.put(projectName.toString(), scriptModule);
 
             manager.addScriptModule(
                 "system.config",
@@ -76,7 +76,13 @@ public class GatewayHook extends AbstractGatewayModuleHook {
 
     @Override
     public Object getRPCHandler(ClientReqSession session, String projectName) {
-        return Utilities.getKey(scriptModules, projectName);
+        WeakReference<ModuleRPCHandler> scriptModule = scriptModules.get(projectName);
+
+        if (scriptModule.get() == null) {
+            scriptModule = new WeakReference<ModuleRPCHandler>(new ModuleRPCHandler(projectName));
+        }
+
+        return scriptModule.get();
     }
 
     @Override
