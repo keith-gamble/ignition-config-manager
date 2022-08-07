@@ -4,23 +4,22 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package com.bwdesigngroup.ignition.configmanager.common;
+package com.bwdesigngroup.ignition.configmanager.common.resources;
 
-import java.util.Map;
-
+import com.bwdesigngroup.ignition.configmanager.common.Constants;
+import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
+import com.inductiveautomation.ignition.common.project.resource.ResourceType;
 /**
  *
  * @author Keith Gamble
  */
-public class Utilities {
-    public static <K, V> K getKey(Map<K, V> map, V value)
-    {
-        for (Map.Entry<K, V> entry: map.entrySet())
-        {
-            if (value.equals(entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-        return null;
+public class ProjectConfigResource extends AbstractConfigResource {
+    public static final ResourceType RESOURCE_TYPE = new ResourceType(Constants.MODULE_ID, "configs");
+    public ProjectConfigResource(String JSON) {
+        super(JSON);
     }
+    public ProjectConfigResource(ProjectResource resource) {
+        super(resource);
+    }
+
 }

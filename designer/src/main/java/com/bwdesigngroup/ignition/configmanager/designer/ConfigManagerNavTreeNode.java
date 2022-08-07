@@ -4,36 +4,27 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package com.bwdesigngroup.ignition.configmanager.common;
+package com.bwdesigngroup.ignition.configmanager.designer;
 
-import java.nio.charset.Charset;
+import com.inductiveautomation.ignition.client.icons.VectorIcons;
+import com.inductiveautomation.ignition.designer.navtree.model.MutableNavTreeNode;
 
-import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
-import com.inductiveautomation.ignition.common.project.resource.ResourceType;
 /**
  *
  * @author Keith Gamble
  */
-public class ConfigResource {
-    public static final ResourceType RESOURCE_TYPE = new ResourceType(Constants.MODULE_ID, Constants.TYPE_ID);
-    public static final String DATA_KEY = Constants.FILE_NAME;
-    public String json = "{}";
+public class ConfigManagerNavTreeNode extends MutableNavTreeNode {
+    
 
-    public ConfigResource(String JSON) {
-        this.json = JSON;
+    public ConfigManagerNavTreeNode() {
+        super();
+        this.setText("Process Configs");
+        this.setIcon(VectorIcons.get("parameter"));
     }
 
-    public ConfigResource(ProjectResource resource) {
-        this.json = deserializeConfig(resource);
+    @Override
+    public String getWorkspaceName() {
+        return "GatewayConfigWorkspace";
     }
 
-    public static String deserializeConfig(ProjectResource resource) {
-        byte[] data = resource.getData(ConfigResource.DATA_KEY);
-
-        if (data != null) {
-            return new String(data, Charset.forName("UTF-8"));
-        } else {
-            return "{}";
-        }
-    }
 }

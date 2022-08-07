@@ -7,19 +7,25 @@
 package com.bwdesigngroup.ignition.configmanager.common.scripting;
 
 
+import java.util.Optional;
+
 import org.json.JSONException;
+import org.python.core.PyDictionary;
 import org.python.core.PyObject;
 
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
+import com.inductiveautomation.ignition.common.script.PyArgParser;
 import com.inductiveautomation.ignition.common.script.builtin.KeywordArgs;
-import com.inductiveautomation.ignition.common.script.builtin.PyArgumentMap;
+import com.inductiveautomation.ignition.common.script.hints.NoHint;
 import com.inductiveautomation.ignition.common.script.hints.ScriptFunction;
 /**
  *
  * @author Keith Gamble
  */
 public abstract class ConfigScriptModule implements ConfigScripts{
+
+    
 
     static {
         BundleUtil.get().addBundle(
@@ -29,24 +35,20 @@ public abstract class ConfigScriptModule implements ConfigScripts{
         );
     }
 
-
-    @Override
     @ScriptFunction(docBundlePrefix = "ConfigScripts")
-    @KeywordArgs(names={"configPath"}, types={String.class})
-    public PyObject getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException {
-        if (pyArgs.length == 0) {
-            throw new IllegalArgumentException("getConfig requires resourcePath parameter");
-        }
+    @KeywordArgs(names={"configPath", "scope"}, types={String.class, String.class})
+    public PyDictionary getConfig(PyObject[] pyArgs, String[] keywords) throws ProjectInvalidException, JSONException {
+        PyArgParser args = PyArgParser.parseArgs(pyArgs, keywords, this.getClass(), "getConfig");
 
-        PyArgumentMap args = PyArgumentMap.interpretPyArgs(pyArgs, keywords, ConfigScriptModule.class, "getConfig"); 
+		String configPath = args.requireString("configPath");
+        
+        // Get the scope from the keywords or the args, or set project to be the default
+        Optional<String> scope = args.getString("scope");
 
-        String configPath = args.getStringArg("configPath");
-
-        return getConfigImpl(configPath);
+        return getConfigImpl(configPath, scope.orElse("gateway"));
     }
 
-    protected abstract PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException;
-
-
+    @NoHint
+    public abstract PyDictionary getConfigImpl(String configPath, String scope) throws ProjectInvalidException, JSONException;
 
 }

@@ -4,19 +4,37 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package com.bwdesigngroup.ignition.configmanager.common.scripting;
+package com.bwdesigngroup.ignition.configmanager.designer;
 
-import org.json.JSONException;
-import org.python.core.PyDictionary;
+import java.util.function.Consumer;
 
-import com.inductiveautomation.ignition.common.project.ProjectInvalidException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.bwdesigngroup.ignition.configmanager.common.resources.AbstractConfigResource;
+import com.inductiveautomation.ignition.common.project.resource.ProjectResourceBuilder;
+import com.inductiveautomation.ignition.common.project.resource.ResourceType;
+import com.inductiveautomation.ignition.designer.tabbedworkspace.TabbedResourceWorkspace;
 
 /**
  *
  * @author Keith Gamble
  */
-public interface ConfigScripts {
+public class ConfigManager {
+    private TabbedResourceWorkspace workspace;
+    private ResourceType resourceType;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    public ConfigManager(TabbedResourceWorkspace workspace, ResourceType resourceType) {
+        this.workspace = workspace;
+        this.resourceType = resourceType;
+    }
 
-    public PyDictionary getConfigImpl(String configPath, String scope) throws ProjectInvalidException, JSONException;
+    public Consumer<ProjectResourceBuilder> newConfigJson = (builder) -> {
+        builder.putData(AbstractConfigResource.DATA_KEY, "{}".getBytes());
+    };
+
+    public ResourceType getResourceType() {
+        return this.resourceType;
+    }
 
 }

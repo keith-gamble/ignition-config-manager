@@ -7,7 +7,7 @@
 package com.bwdesigngroup.ignition.configmanager.client.scripting;
 
 import org.json.JSONException;
-import org.python.core.PyObject;
+import org.python.core.PyDictionary;
 
 // import org.slf4j.Logger;
 // import org.slf4j.LoggerFactory;
@@ -33,7 +33,8 @@ public class ClientScriptModule extends ConfigScriptModule{
     }
 
     @Override
-    protected PyObject getConfigImpl(String configPath) throws ProjectInvalidException, JSONException {
-        return rpc.getConfig(new PyObject[]{}, new String[]{"configPath", configPath});
+    public PyDictionary getConfigImpl(String configPath, String scope) throws ProjectInvalidException, JSONException {
+        return rpc.getConfigImpl(configPath, scope);
     }
+
 }
